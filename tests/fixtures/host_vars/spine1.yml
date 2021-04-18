@@ -1,0 +1,35 @@
+hostname: spine1
+
+interfaces:
+  Loopback0:
+    description: Virt Mgmt
+    ip_add: 10.254.254.1/32
+  Ethernet1:
+    ip_add: 10.1.1.0/31
+    peer: leaf1
+    peer_intf: Ethernet1
+  Ethernet2:
+    ip_add: 10.1.1.2/31
+    peer: leaf2
+    peer_intf: Ethernet1
+  Ethernet3:
+    ip_add: 10.1.1.4/31
+    peer: leaf3
+    peer_intf: Ethernet1
+  Ethernet4:
+    ip_add: 10.1.1.6/31
+    peer: leaf4
+    peer_intf: Ethernet1
+
+bgp:
+  as_no: 64512
+  rid: Loopback0
+  peers:
+    - intf: Ethernet1
+      as_no: 65001
+    - intf: Ethernet2
+      as_no: 65002
+    - intf: Ethernet3
+      as_no: 65003
+    - intf: Ethernet4
+      as_no: 65004

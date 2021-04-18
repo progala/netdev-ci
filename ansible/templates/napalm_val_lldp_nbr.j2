@@ -1,0 +1,9 @@
+---
+- get_lldp_neighbors:
+{% for name, ifdata in interfaces.items() %}
+{%  if 'peer' in ifdata and 'peer_intf' in ifdata %}
+    {{ name }}:
+       - hostname: {{ ifdata['peer'] }}
+         port: {{ ifdata['peer_intf'] }}
+{%  endif %}
+{% endfor %}

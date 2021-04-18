@@ -1,0 +1,15 @@
+{% import 'ip_func.j2' as ipfunc -%}
+---
+- get_bgp_neighbors:
+    global:
+{% for peer in bgp.peers %}
+      peers:
+        {{ ipfunc.bgp_peer_ip(interfaces[peer.intf].ip_add) }}:
+          is_enabled: true
+          is_up: true
+          remote_as: {{ peer.as_no }}
+          address_family:
+            ipv4:
+              sent_prefixes: '>=1'
+              received_prefixes: '>=1'
+{% endfor %}

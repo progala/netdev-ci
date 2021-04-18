@@ -1,0 +1,27 @@
+{% import 'ip_func.j2' as ipfunc %}
+
+hostname {{ hostname }}
+
+ip routing
+
+{% for name, ifdata in interfaces.items() %}
+interface {{ name }}
+{% if ifdata.ip_add is defined and not 'Loop' in name -%}
+ no switchport
+{% endif %}
+{%  if 'description' in ifdata %}
+ description {{ ifdata.description }}
+{%  elif 'peer' in ifdata %}
+ description {{ ifdata.peer }}
+{%  endif %}
+ ip address {{ ifdata.ip_add }}
+{% endfor %}
+
+router bgp {{ bgp.as_no }}
+ router-id {{ interfaces[bgp.rid].ip_add | ipaddr('address') }}
+{%  for peer in bgp.peers %}
+{%  set peer_ip = ipfunc.bgp_peer_ip(interfaces[peer.intf].ip_add) %}
+ neighbor {{ peer_ip }} remote-as {{ peer.as_no }}
+ neighbor {{ peer_ip }} description {{ interfaces[peer.intf].peer }}
+{% endfor %}
+ network {{ interfaces[bgp.rid].ip_add }}

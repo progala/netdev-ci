@@ -1,0 +1,22 @@
+---
+# Make Ansible use local Python venv
+ansible_python_interpreter: ../venv/bin/python3
+
+eos_provider:
+  username: "{{ veos_user }}"
+  password: "{{ veos_pass }}"
+  authorize: yes
+  transport: eapi
+  use_ssl: yes
+  validate_certs: no
+
+napalm_provider:
+  hostname: "{{ ansible_host }}"
+  username: "{{ veos_user }}"
+  password: "{{ veos_pass }}"
+  dev_os: eos
+
+val_dir: "{{ playbook_dir }}/validate"
+vr_image_name: veos:4.18.10M
+inv_name: virtual_lab
+vnodes: [spine1, spine2, leaf1, leaf2]

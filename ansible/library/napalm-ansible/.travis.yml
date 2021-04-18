@@ -1,0 +1,33 @@
+language: python
+
+python:
+    - 2.7
+    - 3.6
+    - 3.7
+    - 3.8
+
+env:
+    - ANSIBLE_VERSION=2.8
+    - ANSIBLE_VERSION=2.9
+
+install:
+    - pip install -r requirements-dev.txt
+    - pip install "ansible>=$ANSIBLE_VERSION.0,<$ANSIBLE_VERSION.99"
+    - pip install -e .
+
+script:
+    - pylama
+    - cd tests
+    - ./run_tests.sh
+    - ./test_changelog.sh
+    - cd ..
+    - py.test
+
+deploy:
+  provider: pypi
+  user: dbarroso
+  password:
+    secure: cXZNckuwEv4qQbUz1uCx3mDnylSCPFTfTrxYISkuRJz6cgNBJZ64KGvKNdF5ygUGAXHLbx3+LtBGtYTei1Rc6Mi8L64+XAH5Johs0TZTnlor0FyezlutGZSnzJEsXSditCl31Ap2kXOtRY5u5lJi+sa/WnLDH/cAIslISsys0RmtAcfO6HYR8rhFXCuTwG4dhWoxVKwcQE2PWZcGWBV1y9vCqMYSVGNYWKXfAduZZnBXXOcHTvCvobz9KvYYYKShOK5j7D1SURXr9/qBKWnnSN4e16UKPfTgj8o/r/zS/K4gb7rONY5Tv1YkzcbN7u/YEO1fB4s43mB//Hv9gSrCZ95Xc5TPaqfUDs15s0t/mxIPNtOJmcxJwm+ewQm5HouO9U0/d7t4Aw5BXVLqVJCsOuz1xvqe5gsJeCIkwDyk2qtqPTYyuBpn3fMXJfHMCLIVcGxmmNjCdAMMdqhVZ4sJlUfTxmxPqU97KRvHlGRW2Cz3QtrVealjdN7+jNWVl7ERiQoKfbF2TjEzdQ4Tr+KZinygv7pst4TT2/wfyzf2YluPyPtISCUUMzLmEogATJbizoOZPSrN1FFrq8PCmsQzYRxxaMU+auTCoJY4gUOefEuQpZgM3m46pzpRpwuZVnvEYt1ffXUNmyggo2jaSYsRQ5wEtzpf8MGjnjDe878M4yA=
+  on:
+    tags: true
+    branch: master

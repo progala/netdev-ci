@@ -1,0 +1,94 @@
+---
+stages:
+  - .pre
+  - static tests
+  - deploy lab
+  - configure lab
+  - validate lab
+  - tear down lab
+
+# Change pip's cache directory to be inside the project directory since we can
+# only cache local items.
+variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+# Pip's cache doesn't store the python packages
+# https://pip.pypa.io/en/stable/reference/pip_install/#caching
+#
+# If you want to also cache the installed packages, you have to install
+# them in a virtualenv and cache it as well.
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
+# --copies argument is used with venv to prevent symlinking of system Python
+before_script:
+  - python3 -m venv --copies venv
+  - source venv/bin/activate
+
+prepare_env:
+  stage: .pre
+  script:
+    - pip install --upgrade pip wheel setuptools
+    - pip install -r requirements.txt
+    - ansible --version
+  timeout: 2 minutes
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+
+static_tests:
+  stage: static tests
+  script:
+    - invoke test
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+
+deploy_lab:
+  stage: deploy lab
+  script:
+    - invoke deploy-lab
+  artifacts:
+    paths:
+      - ansible/hosts.yml
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+
+configure_lab:
+  stage: configure lab
+  script:
+    - invoke configure-lab
+  dependencies:
+    - deploy_lab
+  artifacts:
+    paths:
+      - ansible/validate/
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+
+validate_lab:
+  stage: validate lab
+  script:
+    - invoke validate-lab
+  dependencies:
+    - deploy_lab
+    - configure_lab
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+
+clean_up:
+  stage: tear down lab
+  script:
+    - invoke clean
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success

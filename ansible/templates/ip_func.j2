@@ -1,0 +1,7 @@
+{% macro bgp_peer_ip(our_ip) -%}
+{% if our_ip == our_ip | ipaddr(0) %}
+{{ our_ip | ipaddr(1) | ipaddr('address') -}}
+{% else %}
+{{ our_ip | ipaddr(0) | ipaddr('address') -}}
+{% endif %}
+{%- endmacro %}

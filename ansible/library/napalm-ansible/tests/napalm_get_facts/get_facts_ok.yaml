@@ -1,0 +1,42 @@
+---
+- name: Get facts
+  hosts: all
+  connection: local                       # code is run locally
+  gather_facts: no                        # don't gather facts
+  tasks:
+    - name: get facts from device
+      napalm_get_facts:                   # NAPALM plugin
+        hostname: "{{ host }}"            # start of connection parameters
+        username: "{{ user }}"
+        dev_os: "{{ os }}"
+        password: "{{ password }}"
+        optional_args:
+            path: "{{ playbook_dir }}/mocked/{{ inventory_hostname }}"
+            profile: "{{ profile }}"
+        filter: ['facts', 'route_to', 'interfaces']                # which NAPALM getters to use
+        args:
+            route_to:
+                protocol: static
+                destination: 8.8.8.8
+      register: test_napalm
+    - assert:
+        that:
+            - test_napalm.ansible_facts.napalm_facts.hostname == "localhost"
+            - "{{ '1.0.4.0/24' in test_napalm.ansible_facts.napalm_route_to }}"
+            - test_napalm.ansible_facts.napalm_interfaces.Ethernet1.mac_address == "08:00:27:C6:00:F0"
+    # Check direct facts
+    - assert:
+        that:
+            - napalm_vendor == "Arista"
+            - napalm_model == "vEOS"
+            - napalm_os_version == "4.15.5M-3054042.4155M"
+            - napalm_fqdn == "localhost"
+            - napalm_hostname == "localhost"
+            - napalm_interface_list == [
+                    "Ethernet1",
+                    "Ethernet2",
+                    "Ethernet3",
+                    "Ethernet4",
+                    "Management1" ]
+            - napalm_serial_number == ""
+            - napalm_uptime is defined

@@ -1,0 +1,40 @@
+---
+- name: "PLAY 1: Configure devices and prepare validation data"
+  hosts: virtual_lab
+  connection: local
+  gather_facts: no
+
+  tasks:
+
+  - name: "TASK 1.1: Create device connections"
+    docker_container:
+      name: "{{ conn.name }}"
+      image: vr-xcon
+      command: "{{ conn.command }}"
+      links: "{{ conn.links }}"
+    run_once: True
+    loop: "{{ 'host_vars' | build_dev_conns }}"
+    loop_control:
+      loop_var: conn
+
+  - name: "TASK 1.2: Aply device configs"
+    napalm_install_config:
+      provider: "{{ napalm_provider }}"
+      config: "{{ lookup('template', 'base_cfg.j2') }}"
+      commit_changes: true
+      replace_config: false
+
+  - name: "TASK 1.3: Create dir for storing validation files"
+    file:
+      path: ./validate
+      state: directory
+
+  - name: "TASK 1.4: Auto-generate LLDP validation files"
+    template:
+      src: "napalm_val_lldp_nbr.j2"
+      dest: "{{ val_dir }}/{{ inventory_hostname }}_lldp.yml"
+
+  - name: "TASK 1.5: Auto-generate BGP peering validation files"
+    template:
+      src: "napalm_val_bgp_nbr.j2"
+      dest: "{{ val_dir }}/{{ inventory_hostname }}_bgp_nbr.yml"

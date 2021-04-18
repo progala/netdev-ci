@@ -1,0 +1,41 @@
+---
+- name: "PLAY 1: Validate topology"
+  hosts: virtual_lab
+  connection: local
+  gather_facts: no
+
+  vars:
+    val_dir: "{{ playbook_dir }}/validate"
+
+  tasks:
+
+  - name: "TASK 1.1: Validate LLDP neighbors"
+    napalm_validate:
+      provider: "{{ napalm_provider }}"
+      validation_file: "{{ val_dir }}/{{ inventory_hostname }}_lldp.yml"
+    register: val_lldp
+
+  - name: "TASK 1.2: Validate BGP peerings"
+    napalm_validate:
+      provider: "{{ napalm_provider }}"
+      validation_file: "{{ val_dir }}/{{ inventory_hostname }}_bgp_nbr.yml"
+    register: val_bgp
+
+  - name: "TASK 1.3: Get BGP routes from the routing table"
+    eos_command:
+      commands:
+        - show ip route bgp | json
+      provider: "{{ eos_provider }}"
+    register: bgp_routes_out
+
+  - name: "TASK 1.4: Check if all BGP /32s are reachable"
+    napalm_ping:
+      provider: "{{ napalm_provider }}"
+      destination: "{{ prefix.key | ipaddr('address') }}"
+      count: "2"
+    vars:
+      bgp_routes: "{{ bgp_routes_out.stdout.0.vrfs.default.routes }}"
+    loop: "{{ bgp_routes | dict2items }}"
+    loop_control:
+      label: "{{ prefix.key }}"
+      loop_var: prefix

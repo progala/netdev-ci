@@ -1,0 +1,34 @@
+[
+    {
+      "name": "vr-xcon-spine1_2--leaf1_2",
+      "command": "--p2p spine1/2--leaf1/2",
+      "links": [
+        "spine1",
+        "leaf1"
+      ]
+    },
+    {
+      "name": "vr-xcon-spine1_3--leaf2_2",
+      "command": "--p2p spine1/3--leaf2/2",
+      "links": [
+        "spine1",
+        "leaf2"
+      ]
+    },
+    {
+      "name": "vr-xcon-spine1_4--leaf3_2",
+      "command": "--p2p spine1/4--leaf3/2",
+      "links": [
+        "spine1",
+        "leaf3"
+      ]
+    },
+    {
+      "name": "vr-xcon-spine1_5--leaf4_2",
+      "command": "--p2p spine1/5--leaf4/2",
+      "links": [
+        "spine1",
+        "leaf4"
+      ]
+    }
+  ]

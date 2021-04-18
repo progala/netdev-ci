@@ -1,0 +1,3 @@
+---
+veos_user: "{{ lookup('env','VEOS_USER') }}"
+veos_pass: "{{ lookup('env','VEOS_PASS') }}"
